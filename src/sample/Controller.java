@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.spi.FileTypeDetector;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Controller {
@@ -24,10 +25,13 @@ public class Controller {
     @FXML
     private TextArea textArea;
 
+    @FXML
+    private TextArea lexicalTextArea;
+
     FileChooser fileChooser = new FileChooser();
 
     @FXML
-    void chooseFileOnClick(ActionEvent event) throws IOException {
+    public void chooseFileOnClick(ActionEvent event) throws IOException {
         File file = fileChooser.showOpenDialog(null);
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("snail files", "*.snl"));
         String userHome = System.getProperty("user.home");
@@ -40,12 +44,22 @@ public class Controller {
         }
         }
 
-    public void showFile(FileReader fr){
-        Scanner scanner = new Scanner(fr);
-        String line = scanner.nextLine();
-        while (scanner.hasNext()){
-            System.out.println(line);
-        }
+    @FXML
+    void saveOnClick(ActionEvent event) {
 
     }
+
+
+    @FXML
+    void lexicalAnalyzerOnClick(ActionEvent event) {
+        HashMap<String,String> hash = new HashMap<>();
+        String [] lines = textArea.getText().split("\n");
+        for (int i=0;i<lines.length;i++) {
+            String[] words = lines[i].split("\s");
+            for (int j = 0; j < words.length; j++) {
+                System.out.println(words[j]);
+            }
+        }
+    }
+
 }

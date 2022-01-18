@@ -7,8 +7,9 @@
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
       <Button fx:id="chooseFileBtn" layoutX="58.0" layoutY="37.0" mnemonicParsing="false" onAction="#chooseFileOnClick" prefHeight="25.0" prefWidth="87.0" text="Choose a file" />
-      <TextArea fx:id="textArea" editable="false" layoutX="212.0" layoutY="35.0" prefHeight="219.0" prefWidth="429.0" />
+      <TextArea fx:id="textArea" layoutX="212.0" layoutY="35.0" prefHeight="219.0" prefWidth="429.0" />
       <TextArea fx:id="lexicalTextArea" editable="false" layoutX="212.0" layoutY="266.0" prefHeight="219.0" prefWidth="429.0" />
       <Button layoutX="58.0" layoutY="266.0" mnemonicParsing="false" onAction="#lexicalAnalyzerOnClick" prefHeight="25.0" prefWidth="112.0" text="Lexical Analyzer" />
+      <Button layoutX="58.0" layoutY="75.0" mnemonicParsing="false" onAction="#saveOnClick" prefHeight="25.0" prefWidth="87.0" text="Save" />
    </children>
 </AnchorPane>
