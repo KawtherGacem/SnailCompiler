@@ -5,17 +5,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.spi.FileTypeDetector;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 public class Controller implements Initializable {
@@ -27,13 +25,10 @@ public class Controller implements Initializable {
     public String message ="\"([a-zA-Z])+('?([a-zA-Z0-9])+)*\"";
 
     @FXML
-    private Button chooseFileBtn;
-
-    @FXML
     private TextArea textArea;
 
     @FXML
-    private TextArea lexicalTextArea;
+    private TextArea analyzeTextArea;
 
     FileChooser fileChooser = new FileChooser();
     File file ;
@@ -61,17 +56,18 @@ public class Controller implements Initializable {
         fw.write(textArea.getText());
         fw.close();
     }
-
+    HashMap<String,String> hash = new HashMap<>();
+    String [] lines ;
 
     @FXML
     void lexicalAnalyzerOnClick(ActionEvent event) {
-        HashMap<String,String> hash = new HashMap<>();
-        String [] lines = textArea.getText().split("\n");
+        lines = textArea.getText().split("\n");
         for (int i=0;i<lines.length;i++) {
-            String[] words = lines[i].split("\s");
-            for (int j = 0; j < words.length; j++) {
-                if (words[j].contains(",")){
-                   String[] idents= words[j].split(",");
+            StringTokenizer tokenizer = new StringTokenizer(lines[i],"\s");
+            while (tokenizer.hasMoreTokens()){
+                String token = tokenizer.nextToken();
+                if (token.contains(",")){
+                   String[] idents= token.split(",");
                     for (int k = 0; k < idents.length; k++) {
                         if (Pattern.matches(ident,idents[k])){
                             hash.put(idents[k],"identifier");}
@@ -79,68 +75,99 @@ public class Controller implements Initializable {
                             hash.put(idents[k],"Error, cannot resolve symbol");
                         }
                     }
-                }else if (Pattern.matches("Snl_Start",words[j])){
-                    hash.put(words[j],"reserved word for starting program");}
-                else if (Pattern.matches("Snl_Int",words[j])){
-                    hash.put(words[j],"reserved word for declaring an int");}
-                else if (Pattern.matches("%.",words[j])){
-                    hash.put(words[j],"reserved word for end of line");}
-                else if (Pattern.matches("Set",words[j])){
-                    hash.put(words[j],"reserved word for assigning a value");}
-                else if (Pattern.matches("Snl_Real",words[j])){
-                    hash.put(words[j],"reserved word for declaring a reel");}
-                else if (Pattern.matches("if",words[j])){
-                    hash.put(words[j],"reserved word for condition");}
-                else if (Pattern.matches("%",words[j])){
-                    hash.put(words[j],"reserved word for start and end of condition");}
-                else if (Pattern.matches("Else",words[j])){
-                    hash.put(words[j],"reserved word for condition");}
-                else if (Pattern.matches("Start",words[j])){
-                    hash.put(words[j],"reserved word for starting a condition code");}
-                else if (Pattern.matches("Get",words[j])){
-                    hash.put(words[j],"reserved word for getting a value");}
-                else if (Pattern.matches("Finish",words[j])){
-                    hash.put(words[j],"reserved word for ending a condition code");}
-                else if (Pattern.matches("Snl_Put",words[j])){
-                    hash.put(words[j],"reserved word for showing message");}
-                else if (Pattern.matches("\"",words[j])){
-                    hash.put(words[j],"reserved word for starting and ending message");}
-                else if (Pattern.matches("Snl_St",words[j])){
-                    hash.put(words[j],"reserved word for declaring a string");}
-                else if (Pattern.matches("%..",words[j])){
-                    hash.put(words[j],"reserved word for starting a comment");}
-                else if (Pattern.matches("Snl_close",words[j])){
-                    hash.put(words[j],"reserved word for ending program");}
-                else if (Pattern.matches("<",words[j])){
-                    hash.put(words[j],"reserved word for less then");}
-                else if (Pattern.matches(">",words[j])){
-                    hash.put(words[j],"reserved word for greater then");}
-                else if (Pattern.matches("=",words[j])){
-                    hash.put(words[j],"reserved word for equal to");}
-                else if (Pattern.matches("&",words[j])){
-                    hash.put(words[j],"reserved word for AND");}
-                else if (Pattern.matches("\\|",words[j])){
-                    hash.put(words[j],"reserved word for OR");}
-                else if (Pattern.matches(ident,words[j])){
-                    hash.put(words[j],"identifier");}
-                else if (Pattern.matches(integer,words[j])){
-                    hash.put(words[j],"integer");}
-                else if (Pattern.matches(reel,words[j])){
-                    hash.put(words[j],"reel");}
-                else if (Pattern.matches(comment,words[j])){
-                    hash.put(words[j],"comment");}
-                else if (Pattern.matches(message,words[j])){
-                    hash.put(words[j],"message");}
+                }else if (Pattern.matches("Snl_Start",token)){
+                    hash.put(token,"reserved word for starting program");}
+                else if (Pattern.matches("Snl_Int",token)){
+                    hash.put(token,"reserved word for declaring an int");}
+                else if (Pattern.matches("%.",token)){
+                    hash.put(token,"reserved word for end of line");}
+                else if (Pattern.matches("Set",token)){
+                    hash.put(token,"reserved word for assigning a value");}
+                else if (Pattern.matches("Snl_Real",token)){
+                    hash.put(token,"reserved word for declaring a reel");}
+                else if (Pattern.matches("if",token)){
+                    hash.put(token,"reserved word for condition");}
+                else if (Pattern.matches("%",token)){
+                    hash.put(token,"reserved word for start and end of condition");}
+                else if (Pattern.matches("Else",token)){
+                    hash.put(token,"reserved word for condition");}
+                else if (Pattern.matches("Start",token)){
+                    hash.put(token,"reserved word for starting a condition code");}
+                else if (Pattern.matches("Get",token)){
+                    hash.put(token,"reserved word for getting a value");}
+                else if (Pattern.matches("Finish",token)){
+                    hash.put(token,"reserved word for ending a condition code");}
+                else if (Pattern.matches("Snl_Put",token)){
+                    hash.put(token,"reserved word for showing message");}
+                else if (Pattern.matches("\"",token)){
+                    hash.put(token,"reserved word for starting and ending message");}
+                else if (Pattern.matches("Snl_St",token)){
+                    hash.put(token,"reserved word for declaring a string");}
+                else if (Pattern.matches("%..",token)){
+                    hash.put(token,"reserved word for starting a comment");}
+                else if (Pattern.matches("Snl_Close",token)){
+                    hash.put(token,"reserved word for ending program");}
+                else if (Pattern.matches("<",token)){
+                    hash.put(token,"reserved word for less then");}
+                else if (Pattern.matches(">",token)){
+                    hash.put(token,"reserved word for greater then");}
+                else if (Pattern.matches("=",token)){
+                    hash.put(token,"reserved word for equal to");}
+                else if (Pattern.matches("&",token)){
+                    hash.put(token,"reserved word for AND");}
+                else if (Pattern.matches("\\|",token)){
+                    hash.put(token,"reserved word for OR");}
+                else if (Pattern.matches(ident,token)){
+                    hash.put(token,"identifier");}
+                else if (Pattern.matches(integer,token)){
+                    hash.put(token,"integer");}
+                else if (Pattern.matches(reel,token)){
+                    hash.put(token,"reel");}
+                else if (Pattern.matches(comment,token)){
+                    hash.put(token,"comment");}
+                else if (Pattern.matches(message,token)){
+                    hash.put(token,"message");}
                 else {
-                    hash.put(words[j],"ERROR, cannot resolve symbol");
+                    hash.put(token,"ERROR, cannot resolve symbol");
                 }
             }
+
         }
-        lexicalTextArea.clear();
+        analyzeTextArea.clear();
         for (String i : hash.keySet()) {
-            lexicalTextArea.appendText(i + " : " + hash.get(i)+"\n");
+            analyzeTextArea.appendText(i + " : " + hash.get(i)+"\n");
         }
     }
+    @FXML
+    void syntacticAnalyzerOnClick(ActionEvent event) {
+        HashMap<String,String> hashS =new HashMap<>();
+        analyzeTextArea.clear();
+        if (hash.containsValue("ERROR, cannot resolve symbol")){
+            analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
+        }else{
+           if (!lines[0].equals("Snl_Start")){
+               hashS.put("Snl_Start missing","at line 1");
+           }
+           if (!lines[lines.length - 1].equals("Snl_Close")){
+               hashS.put("Snl_Close missing","at line "+ (lines.length+1));
+           }
+           for (int y=1;y<lines.length-1;y++){
+               if (lines[y].equals("Snl_Start")){
+                   hashS.put("Snl_Start in wrong place ","at line "+(y+1));
+               }else
+               if (lines[y].equals("Snl_Close")){
+                   hashS.put("Snl_Close in wrong place ","at line "+(y+1));
+               }
+            }
 
+
+
+
+        }
+        analyzeTextArea.clear();
+        for (String i : hashS.keySet()) {
+            analyzeTextArea.appendText(i + " : " + hashS.get(i)+"\n");
+        }
+    }
 
 }
