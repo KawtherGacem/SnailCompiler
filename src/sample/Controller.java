@@ -162,12 +162,20 @@ public class Controller implements Initializable {
                }
             }
            int x=1;
+
+
+           // lines rah fiha ga3 lignes ta3 le code
+
+//           dert while bach nparcouri lines w tokenizer bach n9asem lines l words
            while ( x<lines.length){
                 StringTokenizer tokenizer = new StringTokenizer(lines[x],"\s");
                 List<String> tokens = new ArrayList<>();
                 while (tokenizer.hasMoreTokens()){
                    tokens.add(tokenizer.nextToken());
                     }
+//                tokens fiha lwords ta3 la ligne li rana fiha nchoufou word par word la raha syntaxiquement nichan
+//               nchoufou l word lewla hiya 0 3la 7sabha na3arfou la ligne cha normalement yji fiha
+
                 switch (tokens.get(0)){
                    case "Snl_Int":
                        case "Snl_Real":
@@ -175,7 +183,7 @@ public class Controller implements Initializable {
                        if (tokens.size()<2 | tokens.size()>3 ) {
                            errors.add("incorrect statement at line " + (x + 1));
                        }else {
-                           if (!tokens.get(1).contains(",")) {
+                           if (!tokens.get(1).contains(",")) { // hna za3ma la kan identifiers mafsoulin b ","
                                if (!hash.get(tokens.get(1)).equals("identifier")) {
                                    errors.add("expected identifier at line " + (x + 1));
                                }
@@ -241,11 +249,12 @@ public class Controller implements Initializable {
                 x++;
            }
 
-
+//       fel semantique tdiri kima dert besah f les cas ta3 switch tdiri ghi set get w if w snl_put w diri code bach tverifyi
+//         exemple :   set i 34 %. lazem ykoun i declari deja w ykoun integer
+//            hadou ta3arfihoum mel hash fiha koul identifier type ta3ah
 
         }
         analyzeTextArea.clear();
-        System.out.println(errors.toArray());
         if (errors.isEmpty()){
             analyzeTextArea.setText("There are no detected syntactic errors");
         }
