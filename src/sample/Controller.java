@@ -138,11 +138,11 @@ public class Controller implements Initializable {
             analyzeTextArea.appendText(i + " : " + hash.get(i)+"\n");
         }
     }
+    HashMap<String,String> hashtype = new HashMap<>();
+
     @FXML
     void syntacticAnalyzerOnClick(ActionEvent event) {
-        HashMap<String,String> hashS =new HashMap<>();
         ArrayList<String> errors = new ArrayList<>();
-
         analyzeTextArea.clear();
         if (hash.containsValue("ERROR, cannot resolve symbol")){
             analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
@@ -179,7 +179,6 @@ public class Controller implements Initializable {
                 switch (tokens.get(0)){
                    case "Snl_Int":
                        case "Snl_Real":
-                          case "Snl_Put":
                        if (tokens.size()<2 | tokens.size()>3 ) {
                            errors.add("incorrect statement at line " + (x + 1));
                        }else {
@@ -191,9 +190,23 @@ public class Controller implements Initializable {
                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
                                errors.add("expected %. at end of statement at line " + (x + 1));
                            }
+                           hashtype.put(tokens.get(1),tokens.get(0));
                        }
                        break;
-
+                    case "Snl_Put":
+                        if (tokens.size()<2 | tokens.size()>3 ) {
+                            errors.add("incorrect statement at line " + (x + 1));
+                        }else {
+                            if (!tokens.get(1).contains(",")) { // hna za3ma la kan identifiers mafsoulin b ","
+                                if (!hash.get(tokens.get(1)).equals("identifier")) {
+                                    errors.add("expected identifier at line " + (x + 1));
+                                }
+                            }
+                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                                errors.add("expected %. at end of statement at line " + (x + 1));
+                            }
+                            break;
+                        }
                        case "Snl_St":
 
                            if (tokens.size()<2 | tokens.size()>3 ) {
@@ -208,7 +221,9 @@ public class Controller implements Initializable {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
                         }
-                        break;
+                           hashtype.put(tokens.get(1),tokens.get(0));
+
+                           break;
                     case "Set":
                         if (tokens.size()<3 | tokens.size()>4 ) {
                             errors.add("incorrect statement at line " + (x + 1));
@@ -249,18 +264,28 @@ public class Controller implements Initializable {
                 x++;
            }
 
-//       fel semantique tdiri kima dert besah f les cas ta3 switch tdiri ghi set get w if w snl_put w diri code bach tverifyi
-//         exemple :   set i 34 %. lazem ykoun i declari deja w ykoun integer
-//            hadou ta3arfihoum mel hash fiha koul identifier type ta3ah
+
 
         }
         analyzeTextArea.clear();
+        if (!hash.containsValue("ERROR, cannot resolve symbol")){
         if (errors.isEmpty()){
             analyzeTextArea.setText("There are no detected syntactic errors");
         }
         for (String i : errors) {
             analyzeTextArea.appendText(i+"\n");
-        }
+        }}
     }
+
+    @FXML
+    void symanticAnalyzerOnClick(ActionEvent event) {
+        for (String i : hashtype.keySet()){
+            System.out.println(i+ " "+hashtype.get(i));
+        }
+        //       fel semantique tdiri kima dert besah f les cas ta3 switch tdiri ghi set get w if w snl_put w diri code bach tverifyi
+//         exemple :   set i 34 %. lazem ykoun i declari deja w ykoun integer
+//            hadou ta3arfihoum mel hash fiha koul identifier type ta3ah
+    }
+
 
 }

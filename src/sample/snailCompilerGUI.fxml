@@ -26,5 +26,10 @@
             <Cursor fx:constant="HAND" />
          </cursor>
       </Button>
+      <Button layoutX="58.0" layoutY="341.0" mnemonicParsing="false" onAction="#symanticAnalyzerOnClick" prefHeight="25.0" prefWidth="112.0" text="Symantic analyzer">
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
    </children>
 </AnchorPane>
