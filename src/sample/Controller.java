@@ -19,7 +19,7 @@ public class Controller implements Initializable {
     public String integer ="[0-9]+" ;
     public String reel ="[0-9]+.[0-9]+" ;
     public String comment ="\\w";
-    public String message ="\"([a-zA-Z])+('?([a-zA-Z0-9])+)*\"";
+    public String string ="\"([a-zA-Z])+('?([a-zA-Z0-9])+)*\"";
 
     @FXML
     private TextArea textArea;
@@ -93,12 +93,14 @@ public class Controller implements Initializable {
                     hash.put(token, "reserved word for starting a condition code");
                 } else if (Pattern.matches("Get", token)) {
                     hash.put(token, "reserved word for getting a value");
+                } else if (Pattern.matches("from", token)) {
+                    hash.put(token, "reserved word for getting a value");
                 } else if (Pattern.matches("Finish", token)) {
                     hash.put(token, "reserved word for ending a condition code");
                 } else if (Pattern.matches("Snl_Put", token)) {
-                    hash.put(token, "reserved word for showing message");
+                    hash.put(token, "reserved word for showing string");
                 } else if (Pattern.matches("\"", token)) {
-                    hash.put(token, "reserved word for starting and ending message");
+                    hash.put(token, "reserved word for starting and ending string");
                 } else if (Pattern.matches("Snl_St", token)) {
                     hash.put(token, "reserved word for declaring a string");
                 } else if (Pattern.matches("%..", token)) {
@@ -123,8 +125,8 @@ public class Controller implements Initializable {
                     hash.put(token, "reel");
                 } else if (Pattern.matches(comment, token)) {
                     hash.put(token, "comment");
-                } else if (Pattern.matches(message, token)) {
-                    hash.put(token, "message");
+                } else if (Pattern.matches(string, token)) {
+                    hash.put(token, "string");
                 } else {
                     hash.put(token, "ERROR, cannot resolve symbol");
                 }
@@ -139,60 +141,102 @@ public class Controller implements Initializable {
     @FXML
     void syntacticAnalyzerOnClick(ActionEvent event) {
         HashMap<String,String> hashS =new HashMap<>();
+        ArrayList<String> errors = new ArrayList<>();
+
         analyzeTextArea.clear();
         if (hash.containsValue("ERROR, cannot resolve symbol")){
             analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
         }else{
            if (!lines[0].equals("Snl_Start")){
-               hashS.put("Snl_Start missing","at line 1");
+               errors.add("Snl_Start missingat line 1" );
            }
            if (!lines[lines.length - 1].equals("Snl_Close")){
-               hashS.put("Snl_Close missing","at line "+ (lines.length+1));
+               errors.add("Snl_Close missingat line "+ (lines.length+1));
            }
            for (int y=1;y<lines.length-1;y++){
                if (lines[y].equals("Snl_Start")){
-                   hashS.put("Snl_Start in wrong place ","at line "+(y+1));
+                   errors.add("Snl_Start in wrong place at line "+(y+1));
                }else
                if (lines[y].equals("Snl_Close")){
-                   hashS.put("Snl_Close in wrong place ","at line "+(y+1));
+                   errors.add("Snl_Close in wrong place at line "+(y+1));
                }
             }
            int x=1;
-           while ( x<lines.length-1){
+           while ( x<lines.length){
                 StringTokenizer tokenizer = new StringTokenizer(lines[x],"\s");
                 List<String> tokens = new ArrayList<>();
                 while (tokenizer.hasMoreTokens()){
-                   tokens.add(tokenizer.nextToken());}
+                   tokens.add(tokenizer.nextToken());
+                    }
                 switch (tokens.get(0)){
                    case "Snl_Int":
                        case "Snl_Real":
+                          case "Snl_Put":
                        if (tokens.size()<2 | tokens.size()>3 ) {
-                           hashS.put("incorrect statement ", "at line " + (x + 1));
+                           errors.add("incorrect statement at line " + (x + 1));
                        }else {
                            if (!tokens.get(1).contains(",")) {
                                if (!hash.get(tokens.get(1)).equals("identifier")) {
-                                   hashS.put("expected identifier ", "at line " + (x + 1));
+                                   errors.add("expected identifier at line " + (x + 1));
                                }
                            }
                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
-                               hashS.put("expected %. at end of line ", "at line " + (x + 1));
+                               errors.add("expected %. at end of statement at line " + (x + 1));
                            }
                        }
                        break;
-                    case "Snl_St":
-                        if (tokens.size()<2 | tokens.size()>3 ) {
-                            hashS.put("incorrect statement ", "at line " + (x + 1));
+
+                       case "Snl_St":
+
+                           if (tokens.size()<2 | tokens.size()>3 ) {
+                               errors.add("incorrect statement at line " + (x + 1));
                         }else {
-                            if (!hash.get(tokens.get(1)).equals("message")) {
-                                    hashS.put("expected string ", "at line " + (x + 1));
+                            if (!hash.get(tokens.get(1)).equals("string")) {
+                                if (!hash.get(tokens.get(1)).equals("identifier")) {
+                                    errors.add("expected string at line " + (x + 1));
+                                }
                             }
                             if (!tokens.get(tokens.size() - 1).equals("%.")) {
-                                hashS.put("expected %. at end of line ", "at line " + (x + 1));
+                                errors.add("expected %. at end of statement at line " + (x + 1));
                             }
                         }
                         break;
+                    case "Set":
+                        if (tokens.size()<3 | tokens.size()>4 ) {
+                            errors.add("incorrect statement at line " + (x + 1));
+                        }else {
+                            if (!hash.get(tokens.get(1)).equals("identifier")) {
+                                errors.add("expected identifier at line " + (x + 1));
+                            }
+                            if (!hash.get(tokens.get(2)).equals("integer")&!hash.get(tokens.get(2)).equals("reel")&!hash.get(tokens.get(2)).equals("string")) {
+                                errors.add("expected value at line " + (x + 1));
+                            }
+                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                                errors.add("expected %. at end of statement at line " + (x + 1));
+                            }
+                        }
+                        break;
+                    case "Get":
+                        if (tokens.size()<4 | tokens.size()>5 ) {
+                            errors.add("incorrect statement at line " + (x + 1));
+                        }else {
+                            if (!hash.get(tokens.get(1)).equals("identifier")) {
+                                errors.add("expected first identifier at line " + (x + 1));
+                            }
+                            if (!tokens.get(2).equals("from")) {
+                                errors.add("expected from at line " + (x + 1));
+                            }
+                            if (!hash.get(tokens.get(3)).equals("identifier")) {
+                                errors.add("expected second identifier at line " + (x + 1));
+                            }
+                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                                errors.add("expected %. at end of statement at line " + (x + 1));
+                            }
+                        }
+                        break;
+                    case "If":
 
-
+                        break;
                 }
                 x++;
            }
@@ -201,11 +245,12 @@ public class Controller implements Initializable {
 
         }
         analyzeTextArea.clear();
-        if (hashS.isEmpty()){
+        System.out.println(errors.toArray());
+        if (errors.isEmpty()){
             analyzeTextArea.setText("There are no detected syntactic errors");
         }
-        for (String i : hashS.keySet()) {
-            analyzeTextArea.appendText(i + ": " + hashS.get(i)+"\n");
+        for (String i : errors) {
+            analyzeTextArea.appendText(i+"\n");
         }
     }
 
