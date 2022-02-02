@@ -99,8 +99,6 @@ public class Controller implements Initializable {
                     hash.put(token, "reserved word for ending a condition code");
                 } else if (Pattern.matches("Snl_Put", token)) {
                     hash.put(token, "reserved word for showing string");
-                } else if (Pattern.matches("\"", token)) {
-                    hash.put(token, "reserved word for starting and ending string");
                 } else if (Pattern.matches("Snl_St", token)) {
                     hash.put(token, "reserved word for declaring a string");
                 } else if (Pattern.matches("%..", token)) {
@@ -139,10 +137,10 @@ public class Controller implements Initializable {
         }
     }
     HashMap<String,String> hashtype = new HashMap<>();
+    ArrayList<String> errors = new ArrayList<>();
 
     @FXML
     void syntacticAnalyzerOnClick(ActionEvent event) {
-        ArrayList<String> errors = new ArrayList<>();
         analyzeTextArea.clear();
         if (hash.containsValue("ERROR, cannot resolve symbol")) {
             analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
@@ -297,6 +295,14 @@ public class Controller implements Initializable {
                         if (start != finish)
                             errors.add("missing start or finish after else");
                         break;
+                    case "Snl_Close":
+                    case "Start":
+                    case "Finish":
+                        break;
+                    default:
+                        errors.add("unrecognized line at line "+(x+1));
+
+                        break;
                 }
                 x++;
             }
@@ -324,9 +330,69 @@ public class Controller implements Initializable {
         for (String i : hashtype.keySet()){
             System.out.println(i+ " "+hashtype.get(i));
         }
-        //       fel semantique tdiri kima dert besah f les cas ta3 switch tdiri ghi set get w if w snl_put w diri code bach tverifyi
-//         exemple :   set i 34 %. lazem ykoun i declari deja w ykoun integer
-//            hadou ta3arfihoum mel hash fiha koul identifier type ta3ah
+        ArrayList<String> errors2 = new ArrayList<>();
+        analyzeTextArea.clear();
+        if (!errors.isEmpty()) {
+            analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
+        }
+        int x=1;
+        while (x < lines.length) {
+            StringTokenizer tokenizer = new StringTokenizer(lines[x], "\s");
+            List<String> tokens = new ArrayList<>();
+            while (tokenizer.hasMoreTokens()) {
+                tokens.add(tokenizer.nextToken());
+            }
+//                tokens fiha lwords ta3 la ligne li rana fiha nchoufou word par word la raha syntaxiquement nichan
+//               nchoufou l word lewla hiya 0 3la 7sabha na3arfou la ligne cha normalement yji fiha
+
+            switch (tokens.get(0)) {
+                case "Set":
+                    if (!hashtype.containsKey(tokens.get(1))){
+                        errors2.add("undeclared variable at line " + (x + 1));
+                    }else if (hashtype.get(tokens.get(1)).equals("Snl_Int") & !hash.get(tokens.get(2)).equals("integer")){
+                        errors2.add("Type mismatch non Integer value at line " + (x + 1));
+                    } else if (hashtype.get(tokens.get(1)).equals("Snl_Real") & !hash.get(tokens.get(2)).equals("reel")){
+                     errors2.add("Type mismatch non Real value at line " + (x + 1));
+                    } else if (hashtype.get(tokens.get(1)).equals("Snl_St") & !hash.get(tokens.get(2)).equals("string")) {
+                        errors2.add("Type mismatch non string value at line " + (x + 1));
+                    }
+                    break;
+                case "Get":
+                    if (!hashtype.containsKey(tokens.get(1))|!hashtype.containsKey(tokens.get(3))){
+                        errors2.add("undeclared variable at line " + (x + 1));
+                    }else {
+                        if (hashtype.get(tokens.get(1)) != hashtype.get(tokens.get(3))){
+                            errors2.add("Type mismatch at line " + (x + 1));
+                        }
+                    }
+                    break;
+                case "If":
+                    if (!hashtype.containsKey(tokens.get(2))|!hashtype.containsKey(tokens.get(4))){
+                        errors2.add("undeclared variable at line " + (x + 1));
+                    }else {
+                        if (hashtype.get(tokens.get(2)) != hashtype.get(tokens.get(4))){
+                            errors2.add("Type mismatch at line " + (x + 1));
+                        }
+                    }
+                    break;
+                case "Snl_Put":
+                    if (!hashtype.containsKey(tokens.get(1))&!hash.get(tokens.get(1)).equals("string")){
+                        errors2.add("undeclared variable at line " + (x + 1));
+                    }
+                    break;
+            }
+            x++;
+        }
+
+
+        analyzeTextArea.clear();
+            if (errors2.isEmpty()){
+                analyzeTextArea.setText("There are no detected symantic errors");
+            }else
+            for (String i : errors2) {
+                analyzeTextArea.appendText(i+"\n");
+            }
+
     }
 
 
