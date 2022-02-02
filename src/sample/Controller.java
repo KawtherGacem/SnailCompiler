@@ -83,7 +83,7 @@ public class Controller implements Initializable {
                     hash.put(token, "reserved word for assigning a value");
                 } else if (Pattern.matches("Snl_Real", token)) {
                     hash.put(token, "reserved word for declaring a reel");
-                } else if (Pattern.matches("if", token)) {
+                } else if (Pattern.matches("If", token)) {
                     hash.put(token, "reserved word for condition");
                 } else if (Pattern.matches("%", token)) {
                     hash.put(token, "reserved word for start and end of condition");
@@ -108,15 +108,15 @@ public class Controller implements Initializable {
                 } else if (Pattern.matches("Snl_Close", token)) {
                     hash.put(token, "reserved word for ending program");
                 } else if (Pattern.matches("<", token)) {
-                    hash.put(token, "reserved word for less then");
+                    hash.put(token, "less then");
                 } else if (Pattern.matches(">", token)) {
-                    hash.put(token, "reserved word for greater then");
+                    hash.put(token, "greater then");
                 } else if (Pattern.matches("=", token)) {
-                    hash.put(token, "reserved word for equal to");
+                    hash.put(token, "equal to");
                 } else if (Pattern.matches("&", token)) {
-                    hash.put(token, "reserved word for AND");
+                    hash.put(token, "AND");
                 } else if (Pattern.matches("\\|", token)) {
-                    hash.put(token, "reserved word for OR");
+                    hash.put(token, "OR");
                 } else if (Pattern.matches(ident, token)) {
                     hash.put(token, "identifier");
                 } else if (Pattern.matches(integer, token)) {
@@ -144,129 +144,147 @@ public class Controller implements Initializable {
     void syntacticAnalyzerOnClick(ActionEvent event) {
         ArrayList<String> errors = new ArrayList<>();
         analyzeTextArea.clear();
-        if (hash.containsValue("ERROR, cannot resolve symbol")){
+        if (hash.containsValue("ERROR, cannot resolve symbol")) {
             analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
-        }else{
-           if (!lines[0].equals("Snl_Start")){
-               errors.add("Snl_Start missingat line 1" );
-           }
-           if (!lines[lines.length - 1].equals("Snl_Close")){
-               errors.add("Snl_Close missingat line "+ (lines.length+1));
-           }
-           for (int y=1;y<lines.length-1;y++){
-               if (lines[y].equals("Snl_Start")){
-                   errors.add("Snl_Start in wrong place at line "+(y+1));
-               }else
-               if (lines[y].equals("Snl_Close")){
-                   errors.add("Snl_Close in wrong place at line "+(y+1));
-               }
+        } else {
+            if (!lines[0].equals("Snl_Start")) {
+                errors.add("Snl_Start missingat line 1");
             }
-           int x=1;
+            if (!lines[lines.length - 1].equals("Snl_Close")) {
+                errors.add("Snl_Close missingat line " + (lines.length + 1));
+            }
+            for (int y = 1; y < lines.length - 1; y++) {
+                if (lines[y].equals("Snl_Start")) {
+                    errors.add("Snl_Start in wrong place at line " + (y + 1));
+                } else if (lines[y].equals("Snl_Close")) {
+                    errors.add("Snl_Close in wrong place at line " + (y + 1));
+                }
+            }
+            int x = 1;
 
 
-           // lines rah fiha ga3 lignes ta3 le code
+            // lines rah fiha ga3 lignes ta3 le code
 
 //           dert while bach nparcouri lines w tokenizer bach n9asem lines l words
-           while ( x<lines.length){
-                StringTokenizer tokenizer = new StringTokenizer(lines[x],"\s");
+            while (x < lines.length) {
+                StringTokenizer tokenizer = new StringTokenizer(lines[x], "\s");
                 List<String> tokens = new ArrayList<>();
-                while (tokenizer.hasMoreTokens()){
-                   tokens.add(tokenizer.nextToken());
-                    }
+                while (tokenizer.hasMoreTokens()) {
+                    tokens.add(tokenizer.nextToken());
+                }
 //                tokens fiha lwords ta3 la ligne li rana fiha nchoufou word par word la raha syntaxiquement nichan
 //               nchoufou l word lewla hiya 0 3la 7sabha na3arfou la ligne cha normalement yji fiha
 
-                switch (tokens.get(0)){
-                   case "Snl_Int":
-                       case "Snl_Real":
-                       if (tokens.size()<2 | tokens.size()>3 ) {
-                           errors.add("incorrect statement at line " + (x + 1));
-                       }else {
-                           if (!tokens.get(1).contains(",")) { // hna za3ma la kan identifiers mafsoulin b ","
-                               if (!hash.get(tokens.get(1)).equals("identifier")) {
-                                   errors.add("expected identifier at line " + (x + 1));
-                               }
-                           }
-                           if (!tokens.get(tokens.size() - 1).equals("%.")) {
-                               errors.add("expected %. at end of statement at line " + (x + 1));
-                           }
-                           hashtype.put(tokens.get(1),tokens.get(0));
-                       }
-                       break;
-                    case "Snl_Put":
-                        if (tokens.size()<2 | tokens.size()>3 ) {
-                            errors.add("incorrect statement at line " + (x + 1));
-                        }else {
-                            if (!tokens.get(1).contains(",")) { // hna za3ma la kan identifiers mafsoulin b ","
-                                if (!hash.get(tokens.get(1)).equals("identifier")) {
+                switch (tokens.get(0)) {
+                    case "Snl_Int":
+                    case "Snl_Real":
+                        if (tokens.size() < 3) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                        }
+                        if (tokens.size() < 2 || (!hash.get(tokens.get(1)).equals("identifier") & !tokens.get(1).contains(","))) {
+                                    errors.add("expected identifier at line " + (x + 1));
+                        }
+
+                        if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                                errors.add("expected %. at end of statement at line " + (x + 1));
+                        }
+                        hashtype.put(tokens.get(1), tokens.get(0));
+
+                        break;
+                    case "Snl_St":
+                        if (tokens.size() < 3) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                                if (tokens.size() < 2 || !hash.get(tokens.get(1)).equals("identifier")) {
                                     errors.add("expected identifier at line " + (x + 1));
                                 }
-                            }
-                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+
+                            if (tokens.size() < 3 || !tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
                             break;
                         }
-                       case "Snl_St":
+                    case "Snl_Put":
 
-                           if (tokens.size()<2 | tokens.size()>3 ) {
-                               errors.add("incorrect statement at line " + (x + 1));
-                        }else {
-                            if (!hash.get(tokens.get(1)).equals("string")) {
-                                if (!hash.get(tokens.get(1)).equals("identifier")) {
+                        if (tokens.size() < 3) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                        }
+                            if (tokens.size() < 2 || (!hash.get(tokens.get(1)).equals("string") & !hash.get(tokens.get(1)).equals("identifier"))) {
                                     errors.add("expected string at line " + (x + 1));
                                 }
-                            }
-                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+
+                            if (tokens.size() < 3 || !tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
-                        }
-                           hashtype.put(tokens.get(1),tokens.get(0));
 
-                           break;
+                        hashtype.put(tokens.get(1), tokens.get(0));
+
+                        break;
                     case "Set":
-                        if (tokens.size()<3 | tokens.size()>4 ) {
-                            errors.add("incorrect statement at line " + (x + 1));
-                        }else {
-                            if (!hash.get(tokens.get(1)).equals("identifier")) {
+                        if (tokens.size() < 4) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                        }
+                            if (tokens.size() < 2 || !hash.get(tokens.get(1)).equals("identifier")) {
                                 errors.add("expected identifier at line " + (x + 1));
                             }
-                            if (!hash.get(tokens.get(2)).equals("integer")&!hash.get(tokens.get(2)).equals("reel")&!hash.get(tokens.get(2)).equals("string")) {
+                            if (tokens.size() < 3 || (!hash.get(tokens.get(2)).equals("integer") & !hash.get(tokens.get(2)).equals("reel") & !hash.get(tokens.get(2)).equals("string"))) {
                                 errors.add("expected value at line " + (x + 1));
                             }
-                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                            if (tokens.size() < 4 || !tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
-                        }
+
                         break;
                     case "Get":
-                        if (tokens.size()<4 | tokens.size()>5 ) {
-                            errors.add("incorrect statement at line " + (x + 1));
-                        }else {
-                            if (!hash.get(tokens.get(1)).equals("identifier")) {
+                        if (tokens.size() < 5) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                          }
+                            if (tokens.size() < 2 || !hash.get(tokens.get(1)).equals("identifier")) {
                                 errors.add("expected first identifier at line " + (x + 1));
                             }
-                            if (!tokens.get(2).equals("from")) {
+                            if (tokens.size() < 3 || !tokens.get(2).equals("from")) {
                                 errors.add("expected from at line " + (x + 1));
                             }
-                            if (!hash.get(tokens.get(3)).equals("identifier")) {
+                            if (tokens.size() < 4 || !hash.get(tokens.get(3)).equals("identifier")) {
                                 errors.add("expected second identifier at line " + (x + 1));
                             }
-                            if (!tokens.get(tokens.size() - 1).equals("%.")) {
+                            if (tokens.size() < 5 || !tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
-                        }
+
                         break;
                     case "If":
+                        if (tokens.size() < 7) {
+                            errors.add("incompleted statement at line " + (x + 1));
+                        }
+                        if (tokens.size() < 2 || !tokens.get(1).equals("%")) {
+                            errors.add("expected opening % at line " + (x + 1));
+                        }
+                        if (tokens.size() < 6 || !tokens.get(5).equals("%")) {
+                            errors.add("expected closing % at line " + (x + 1));
+                        }
+                        if (tokens.size() < 3|| (!hash.get(tokens.get(2)).equals("integer") & !hash.get(tokens.get(2)).equals("reel") & !hash.get(tokens.get(2)).equals("string") & !hash.get(tokens.get(2)).equals("identifier"))) {
+                                errors.add("expected first part condition at line " + (x + 1));
+                        }
+                        if (tokens.size() < 5 || (!hash.get(tokens.get(4)).equals("integer") & !hash.get(tokens.get(4)).equals("reel") & !hash.get(tokens.get(4)).equals("string") & !hash.get(tokens.get(4)).equals("identifier"))) {
+                                errors.add("expected second part in condition values at line " + (x + 1));
+                        }
+                        if (tokens.size() < 4 || (!hash.get(tokens.get(3)).equals("less then") & !hash.get(tokens.get(3)).equals("greater then") & !hash.get(tokens.get(3)).equals("equal to") & !hash.get(tokens.get(3)).equals("AND") & !hash.get(tokens.get(3)).equals("OR"))) {
+                                errors.add("expected operator in condition values at line " + (x + 1));
+                        }
+                        if (!tokens.get(tokens.size() - 1).equals("do")) {
+                            errors.add("expected do at end of statement at line " + (x + 1));
+                        }
 
                         break;
                 }
                 x++;
-           }
-
-
-
+            }
         }
+
+
+
+
+
         analyzeTextArea.clear();
         if (!hash.containsValue("ERROR, cannot resolve symbol")){
         if (errors.isEmpty()){
