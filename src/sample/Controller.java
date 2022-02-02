@@ -194,6 +194,7 @@ public class Controller implements Initializable {
                     case "Snl_St":
                         if (tokens.size() < 3) {
                             errors.add("incompleted statement at line " + (x + 1));
+                        }
                                 if (tokens.size() < 2 || !hash.get(tokens.get(1)).equals("identifier")) {
                                     errors.add("expected identifier at line " + (x + 1));
                                 }
@@ -201,8 +202,10 @@ public class Controller implements Initializable {
                             if (tokens.size() < 3 || !tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
-                            break;
-                        }
+
+                        hashtype.put(tokens.get(1), tokens.get(0));
+                    break;
+
                     case "Snl_Put":
 
                         if (tokens.size() < 3) {
@@ -216,7 +219,6 @@ public class Controller implements Initializable {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                             }
 
-                        hashtype.put(tokens.get(1), tokens.get(0));
 
                         break;
                     case "Set":
@@ -275,6 +277,25 @@ public class Controller implements Initializable {
                             errors.add("expected do at end of statement at line " + (x + 1));
                         }
 
+//                       lines after if
+
+
+                        break;
+                    case "Else":
+                        int y=x;
+                        boolean start = false;
+                        boolean finish = false;
+                        while (y<lines.length) {
+                            if (lines[y].contains("Start")){
+                                start=true;
+                            }
+                            if (lines[y].contains("Finish")){
+                                finish=true;
+                            }
+                            y++;
+                        }
+                        if (start != finish)
+                            errors.add("missing start or finish after else");
                         break;
                 }
                 x++;
@@ -293,6 +314,9 @@ public class Controller implements Initializable {
         for (String i : errors) {
             analyzeTextArea.appendText(i+"\n");
         }}
+        else {
+            analyzeTextArea.setText("There are lexical errors, correct them!");
+        }
     }
 
     @FXML
