@@ -105,6 +105,8 @@ public class Controller implements Initializable {
                     hash.put(token, "reserved word for starting a comment");
                 } else if (Pattern.matches("Snl_Close", token)) {
                     hash.put(token, "reserved word for ending program");
+                } else if (Pattern.matches("do", token)) {
+                    hash.put(token, "reserved word for If statement");
                 } else if (Pattern.matches("<", token)) {
                     hash.put(token, "less then");
                 } else if (Pattern.matches(">", token)) {
@@ -138,9 +140,14 @@ public class Controller implements Initializable {
     }
     HashMap<String,String> hashtype = new HashMap<>();
     ArrayList<String> errors = new ArrayList<>();
+    ArrayList<String> identErrors = new ArrayList<>();
+
 
     @FXML
     void syntacticAnalyzerOnClick(ActionEvent event) {
+        errors.clear();
+        identErrors.clear();
+        hashtype.clear();
         analyzeTextArea.clear();
         if (hash.containsValue("ERROR, cannot resolve symbol")) {
             analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
@@ -161,17 +168,12 @@ public class Controller implements Initializable {
             int x = 1;
 
 
-            // lines rah fiha ga3 lignes ta3 le code
-
-//           dert while bach nparcouri lines w tokenizer bach n9asem lines l words
             while (x < lines.length) {
                 StringTokenizer tokenizer = new StringTokenizer(lines[x], "\s");
                 List<String> tokens = new ArrayList<>();
                 while (tokenizer.hasMoreTokens()) {
                     tokens.add(tokenizer.nextToken());
                 }
-//                tokens fiha lwords ta3 la ligne li rana fiha nchoufou word par word la raha syntaxiquement nichan
-//               nchoufou l word lewla hiya 0 3la 7sabha na3arfou la ligne cha normalement yji fiha
 
                 switch (tokens.get(0)) {
                     case "Snl_Int":
@@ -179,29 +181,65 @@ public class Controller implements Initializable {
                         if (tokens.size() < 3) {
                             errors.add("incompleted statement at line " + (x + 1));
                         }
-                        if (tokens.size() < 2 || (!hash.get(tokens.get(1)).equals("identifier") & !tokens.get(1).contains(","))) {
-                                    errors.add("expected identifier at line " + (x + 1));
+                        if (!tokens.get(1).contains(",")) {
+                            if (tokens.size() < 2 || (!hash.get(tokens.get(1)).equals("identifier"))) {
+                                errors.add("expected identifier at line " + (x + 1));
+                            }
                         }
+
 
                         if (!tokens.get(tokens.size() - 1).equals("%.")) {
                                 errors.add("expected %. at end of statement at line " + (x + 1));
                         }
+//                        storing declared variables and errors about identifier names that are already token
+
+                        if (!tokens.get(1).contains(",")&!hashtype.containsKey(tokens.get(1))){
                         hashtype.put(tokens.get(1), tokens.get(0));
+                        } else if (tokens.get(1).contains(",")){
+                            StringTokenizer tokenizer1 = new StringTokenizer(tokens.get(1), ",");
+                            while (tokenizer1.hasMoreTokens()) {
+                                String t = tokenizer1.nextToken();
+                                if (!hashtype.containsKey(t)){
+                                hashtype.put(t,tokens.get(0));
+                                  } else
+                                    identErrors.add("identifier "+t+ " already taken, rename it! at line "+ (x + 1));
+                            }
+                        }else if (hashtype.containsKey(tokens.get(1))){
+                            identErrors.add("identifier "+tokens.get(1)+ " already taken, rename it! at line "+ (x + 1));
+                        }
+
+
+
 
                         break;
                     case "Snl_St":
                         if (tokens.size() < 3) {
                             errors.add("incompleted statement at line " + (x + 1));
                         }
-                                if (tokens.size() < 2 || !hash.get(tokens.get(1)).equals("identifier")) {
-                                    errors.add("expected identifier at line " + (x + 1));
-                                }
-
-                            if (tokens.size() < 3 || !tokens.get(tokens.size() - 1).equals("%.")) {
-                                errors.add("expected %. at end of statement at line " + (x + 1));
+                        if (!tokens.get(1).contains(",")) {
+                            if (tokens.size() < 2 || (!hash.get(tokens.get(1)).equals("identifier"))) {
+                                errors.add("expected identifier at line " + (x + 1));
                             }
+                        }
 
-                        hashtype.put(tokens.get(1), tokens.get(0));
+                        if (tokens.size() < 3 || !tokens.get(tokens.size() - 1).equals("%.")) {
+                                errors.add("expected %. at end of statement at line " + (x + 1));
+                        }
+//                        storing declared variables and errors about identifier names that are already token
+                        if (!tokens.get(1).contains(",")&!hashtype.containsKey(tokens.get(1))){
+                            hashtype.put(tokens.get(1), tokens.get(0));
+                        } else if (tokens.get(1).contains(",")){
+                            StringTokenizer tokenizer1 = new StringTokenizer(tokens.get(1), ",");
+                            while (tokenizer1.hasMoreTokens()) {
+                                String t = tokenizer1.nextToken();
+                                if (!hashtype.containsKey(t)){
+                                    hashtype.put(t,tokens.get(0));
+                                } else
+                                    identErrors.add("identifier "+t+ " already taken, rename it! at line"+ (x + 1));
+                            }
+                        }else if (hashtype.containsKey(tokens.get(1))){
+                            identErrors.add("identifier "+tokens.get(1)+ " already taken, rename it! at line "+ (x + 1));
+                        }
                     break;
 
                     case "Snl_Put":
@@ -275,7 +313,7 @@ public class Controller implements Initializable {
                             errors.add("expected do at end of statement at line " + (x + 1));
                         }
 
-//                       lines after if
+//
 
 
                         break;
@@ -298,6 +336,7 @@ public class Controller implements Initializable {
                     case "Snl_Close":
                     case "Start":
                     case "Finish":
+                    case "%..":
                         break;
                     default:
                         errors.add("unrecognized line at line "+(x+1));
@@ -324,16 +363,17 @@ public class Controller implements Initializable {
             analyzeTextArea.setText("There are lexical errors, correct them!");
         }
     }
+    ArrayList<String> errors2 = new ArrayList<>();
 
     @FXML
     void symanticAnalyzerOnClick(ActionEvent event) {
+    errors2.clear();
         for (String i : hashtype.keySet()){
             System.out.println(i+ " "+hashtype.get(i));
         }
-        ArrayList<String> errors2 = new ArrayList<>();
         analyzeTextArea.clear();
         if (!errors.isEmpty()) {
-            analyzeTextArea.setText("There is a Lexical error you can't do a syntactic analyze");
+            analyzeTextArea.setText("There is a syntaxic error you can't do a semantic analyze, correct them!!!");
         }
         int x=1;
         while (x < lines.length) {
@@ -342,8 +382,7 @@ public class Controller implements Initializable {
             while (tokenizer.hasMoreTokens()) {
                 tokens.add(tokenizer.nextToken());
             }
-//                tokens fiha lwords ta3 la ligne li rana fiha nchoufou word par word la raha syntaxiquement nichan
-//               nchoufou l word lewla hiya 0 3la 7sabha na3arfou la ligne cha normalement yji fiha
+//
 
             switch (tokens.get(0)) {
                 case "Set":
@@ -361,7 +400,7 @@ public class Controller implements Initializable {
                     if (!hashtype.containsKey(tokens.get(1))|!hashtype.containsKey(tokens.get(3))){
                         errors2.add("undeclared variable at line " + (x + 1));
                     }else {
-                        if (hashtype.get(tokens.get(1)) != hashtype.get(tokens.get(3))){
+                        if (!hashtype.get(tokens.get(1)).equals(hashtype.get(tokens.get(3)))){
                             errors2.add("Type mismatch at line " + (x + 1));
                         }
                     }
@@ -370,7 +409,7 @@ public class Controller implements Initializable {
                     if (!hashtype.containsKey(tokens.get(2))|!hashtype.containsKey(tokens.get(4))){
                         errors2.add("undeclared variable at line " + (x + 1));
                     }else {
-                        if (hashtype.get(tokens.get(2)) != hashtype.get(tokens.get(4))){
+                        if (!hashtype.get(tokens.get(2)).equals(hashtype.get(tokens.get(4)))){
                             errors2.add("Type mismatch at line " + (x + 1));
                         }
                     }
@@ -386,13 +425,16 @@ public class Controller implements Initializable {
 
 
         analyzeTextArea.clear();
-            if (errors2.isEmpty()){
+            if (errors2.isEmpty()&identErrors.isEmpty()){
                 analyzeTextArea.setText("There are no detected symantic errors");
-            }else
-            for (String i : errors2) {
-                analyzeTextArea.appendText(i+"\n");
+            } else {
+                for (String i : errors2) {
+                    analyzeTextArea.appendText(i+"\n");
+                }
+                for (String i : identErrors) {
+                    analyzeTextArea.appendText(i+"\n");
+                }
             }
-
     }
 
 
